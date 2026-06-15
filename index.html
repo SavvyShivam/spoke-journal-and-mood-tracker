@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Spoke — The AI voice journal that turns your spoken thoughts into weekly insights. No writing. No blank pages. Just talk.">
+  <meta property="og:title" content="Spoke — Voice Journal & AI Mood Tracker">
+  <meta property="og:description" content="Speak instead of write. Your AI journal that surfaces the patterns in your life every week.">
+  <title>Spoke — Voice Journal &amp; AI Mood Tracker</title>
+  <link rel="icon" href="../voice_journal/assets/icon/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+  <style>
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:             #0F0F0F;
+      --surface:        #1A1A1A;
+      --surface-mid:    #222222;
+      --border:         #282828;
+      --border-hi:      #353535;
+      --amber:          #E8A030;
+      --amber-glow:     rgba(232,160,48,0.12);
+      --amber-border:   rgba(232,160,48,0.28);
+      --text-1:         #F0EDE8;
+      --text-2:         #8A8480;
+      --text-3:         #555550;
+      --green:          #6DBF8A;
+      --red:            #C06060;
+      --font:           'DM Sans', -apple-system, sans-serif;
+      --ease:           cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Subtle grain texture overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      background: rgba(15,15,15,0.82);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .nav-icon img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .nav-wordmark {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-1);
+      letter-spacing: -0.4px;
+    }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--amber);
+      color: #0F0F0F;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 9px 22px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: -0.2px;
+      transition: background 0.2s var(--ease), transform 0.15s var(--ease);
+    }
+
+    .nav-cta:hover {
+      background: #F5B348;
+      transform: translateY(-1px);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 104px 48px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient glow behind phone */
+    .hero-glow {
+      position: absolute;
+      top: 50%;
+      right: 8%;
+      transform: translateY(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(ellipse at center, rgba(232,160,48,0.11) 0%, transparent 68%);
+      animation: glowBreath 5s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes glowBreath {
+      from { opacity: 0.7; transform: translateY(-50%) scale(0.95); }
+      to   { opacity: 1.0; transform: translateY(-50%) scale(1.08); }
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--amber-glow);
+      border: 1px solid var(--amber-border);
+      color: var(--amber);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .hero-h1 {
+      font-size: clamp(46px, 5.5vw, 70px);
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -2.5px;
+      color: var(--text-1);
+      margin-bottom: 22px;
+      animation: fadeUp 0.5s ease 0.08s both;
+    }
+
+    .hero-h1 .amber { color: var(--amber); }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--text-2);
+      line-height: 1.68;
+      max-width: 500px;
+      margin-bottom: 44px;
+      font-weight: 400;
+      animation: fadeUp 0.5s ease 0.16s both;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.5s ease 0.24s both;
+    }
+
+    /* Google Play badge */
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 13px;
+      background: var(--surface-mid);
+      border: 1px solid var(--border-hi);
+      padding: 13px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-1);
+      transition: border-color 0.2s var(--ease), transform 0.15s var(--ease), background 0.2s;
+    }
+
+    .play-btn:hover {
+      border-color: var(--amber-border);
+      background: var(--surface);
+      transform: translateY(-2px);
+    }
+
+    .play-btn svg { flex-shrink: 0; }
+
+    .play-btn-labels { display: flex; flex-direction: column; gap: 1px; }
+    .play-btn-labels .top { font-size: 11px; color: var(--text-2); font-weight: 400; letter-spacing: 0.3px; }
+    .play-btn-labels .bot { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
+
+    .hero-note {
+      font-size: 13px;
+      color: var(--text-3);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── HERO PHONE MOCKUP ── */
+    .phone-col {
+      display: flex;
+      justify-content: center;
+      animation: phoneIn 0.7s ease 0.2s both;
+      position: relative;
+    }
+
+    @keyframes phoneIn {
+      from { opacity: 0; transform: translateX(28px) translateY(8px); }
+      to   { opacity: 1; transform: translateX(0) translateY(0); }
+    }
+
+    /* Shadow glow under phone */
+    .phone-col::after {
+      content: '';
+      position: absolute;
+      bottom: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      height: 100px;
+      background: radial-gradient(ellipse, rgba(232,160,48,0.22) 0%, transparent 70%);
+      filter: blur(24px);
+      pointer-events: none;
+    }
+
+    .phone {
+      width: 258px;
+      height: 528px;
+      background: #101010;
+      border-radius: 42px;
+      border: 2px solid #303030;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 40px 100px rgba(0,0,0,0.8),
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 13px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 82px;
+      height: 22px;
+      background: #101010;
+      border-radius: 100px;
+      border: 1px solid #282828;
+      z-index: 10;
+    }
+
+    .phone-screen {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 52px 22px 28px;
+    }
+
+    .p-title   { font-size: 13px; font-weight: 600; color: var(--text-1); margin-bottom: 3px; }
+    .p-recstatus { font-size: 11px; color: var(--amber); font-weight: 600; letter-spacing: 0.2px; margin-bottom: 20px; }
+    .p-timer   { font-size: 34px; font-weight: 800; color: var(--text-1); letter-spacing: -1.5px; margin-bottom: 14px; }
+
+    .waveform {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3.5px;
+      height: 48px;
+      width: 100%;
+      margin-bottom: 18px;
+    }
+
+    .wbar {
+      width: 3.5px;
+      border-radius: 100px;
+      background: var(--amber);
+      opacity: 0.85;
+      animation: wdance 1.3s ease-in-out infinite;
+    }
+
+    .wbar:nth-child(1)  { height:10px; animation-delay:0.00s; }
+    .wbar:nth-child(2)  { height:24px; animation-delay:0.12s; }
+    .wbar:nth-child(3)  { height:16px; animation-delay:0.28s; }
+    .wbar:nth-child(4)  { height:38px; animation-delay:0.04s; }
+    .wbar:nth-child(5)  { height:22px; animation-delay:0.20s; }
+    .wbar:nth-child(6)  { height:32px; animation-delay:0.36s; }
+    .wbar:nth-child(7)  { height:14px; animation-delay:0.08s; }
+    .wbar:nth-child(8)  { height:40px; animation-delay:0.16s; }
+    .wbar:nth-child(9)  { height:26px; animation-delay:0.32s; }
+    .wbar:nth-child(10) { height:18px; animation-delay:0.44s; }
+    .wbar:nth-child(11) { height:34px; animation-delay:0.24s; }
+    .wbar:nth-child(12) { height:12px; animation-delay:0.40s; }
+    .wbar:nth-child(13) { height:28px; animation-delay:0.06s; }
+    .wbar:nth-child(14) { height:10px; animation-delay:0.18s; }
+
+    @keyframes wdance {
+      0%,100% { transform: scaleY(1);   opacity: 0.85; }
+      50%      { transform: scaleY(0.3); opacity: 0.4;  }
+    }
+
+    .p-transcript {
+      background: var(--surface-mid);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      width: 100%;
+      margin-bottom: auto;
+      flex-shrink: 0;
+    }
+
+    .p-transcript p {
+      font-size: 10.5px;
+      color: var(--text-2);
+      line-height: 1.55;
+    }
+
+    .p-transcript p em { color: var(--text-1); font-style: normal; }
+
+    .p-recbtn {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: var(--amber);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 16px;
+      flex-shrink: 0;
+      animation: recPulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes recPulse {
+      0%,100% { box-shadow: 0 0 18px rgba(232,160,48,0.4); }
+      50%      { box-shadow: 0 0 40px rgba(232,160,48,0.7), 0 0 70px rgba(232,160,48,0.18); }
+    }
+
+    .p-recbtn::after {
+      content: '';
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      background: #0F0F0F;
+    }
+
+    .p-chips {
+      display: flex;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+    .chip.g { background: rgba(109,191,138,0.15); color: var(--green);  border: 1px solid rgba(109,191,138,0.25); }
+    .chip.n { background: rgba(232,160,48,0.12);  color: var(--amber);  border: 1px solid rgba(232,160,48,0.25); }
+    .chip.r { background: rgba(192,96,96,0.14);   color: var(--red);    border: 1px solid rgba(192,96,96,0.25); }
+
+    /* ── FEATURES ── */
+    .features {
+      padding: 110px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .sec-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--amber);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 18px;
+    }
+
+    .sec-title {
+      font-size: clamp(32px, 3.5vw, 50px);
+      font-weight: 800;
+      letter-spacing: -1.8px;
+      line-height: 1.09;
+      margin-bottom: 18px;
+    }
+
+    .sec-sub {
+      font-size: 17px;
+      color: var(--text-2);
+      max-width: 520px;
+      margin-bottom: 64px;
+      line-height: 1.65;
+    }
+
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .feat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 30px 28px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.22s var(--ease), transform 0.18s var(--ease), background 0.2s;
+    }
+
+    .feat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--amber);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.3s var(--ease);
+    }
+
+    .feat-card:hover {
+      border-color: var(--amber-border);
+      background: #1e1e1e;
+      transform: translateY(-3px);
+    }
+
+    .feat-card:hover::after { transform: scaleX(1); }
+
+    .feat-icon  { font-size: 28px; margin-bottom: 18px; display: block; line-height: 1; }
+    .feat-name  { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 9px; }
+    .feat-desc  { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+
+    /* ── SCREENSHOTS STRIP ── */
+    .shots-section {
+      background: #111111;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 100px 0;
+      overflow: hidden;
+    }
+
+    .shots-head {
+      padding: 0 48px;
+      max-width: 1200px;
+      margin: 0 auto 56px;
+    }
+
+    .shots-strip {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      padding: 16px 48px 40px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .shots-strip::-webkit-scrollbar       { height: 4px; }
+    .shots-strip::-webkit-scrollbar-track { background: transparent; }
+    .shots-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .ss-item {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      scroll-snap-align: start;
+    }
+
+    .ss-phone {
+      width: 195px;
+      height: 390px;
+      background: #111;
+      border-radius: 32px;
+      border: 2px solid #2C2C2C;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03) inset;
+      transition: border-color 0.22s var(--ease), transform 0.18s var(--ease);
+    }
+
+    .ss-phone:hover {
+      border-color: var(--amber-border);
+      transform: translateY(-5px);
+    }
+
+    .ss-notch {
+      position: absolute;
+      top: 10px; left: 50%;
+      transform: translateX(-50%);
+      width: 60px; height: 15px;
+      background: #111;
+      border-radius: 100px;
+      border: 1px solid #252525;
+      z-index: 10;
+    }
+
+    .ss-screen {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      padding: 38px 14px 16px;
+      gap: 6px;
+    }
+
+    .ss-head {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-2);
+      margin-bottom: 4px;
+    }
+
+    .ss-caption {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      letter-spacing: -0.1px;
+    }
+
+    /* ── SCREENSHOT 1: Recording ── */
+    .ss-wave {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5px;
+      height: 36px;
+    }
+
+    .ss-wave span {
+      flex: 1;
+      max-width: 3px;
+      border-radius: 2px;
+      background: var(--amber);
+      opacity: 0.75;
+    }
+
+    .ss-recbtn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--amber);
+      flex-shrink: 0;
+      margin: auto auto 0;
+      box-shadow: 0 0 20px rgba(232,160,48,0.4);
+    }
+
+    /* ── SCREENSHOT 2: Entries ── */
+    .ss-entry {
+      background: var(--surface-mid);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 11px;
+      flex-shrink: 0;
+    }
+    .ss-edate { font-size: 8.5px; color: var(--text-2); margin-bottom: 3px; }
+    .ss-etext { font-size: 9.5px; color: var(--text-1); line-height: 1.4; }
+    .ss-dot   { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-top: 5px; }
+
+    /* ── SCREENSHOT 3: Mood ── */
+    .ss-mood-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .ss-mood-btn {
+      background: var(--surface-mid);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .ss-mood-em { font-size: 18px; }
+    .ss-mood-l  { font-size: 8.5px; color: var(--text-2); }
+
+    /* ── SCREENSHOT 4: AI Summary ── */
+    .ss-sumcard {
+      background: var(--surface-mid);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 11px;
+    }
+    .ss-sumwk  { font-size: 9px; font-weight: 700; color: var(--amber); margin-bottom: 5px; }
+    .ss-sumtxt { font-size: 9px; color: var(--text-2); line-height: 1.5; margin-bottom: 7px; }
+    .ss-line   { height: 6px; border-radius: 3px; background: var(--border); margin-bottom: 4px; }
+
+    /* ── SCREENSHOT 5: Streak ── */
+    .ss-streak-num { font-size: 42px; font-weight: 800; color: var(--amber); text-align: center; letter-spacing: -2px; line-height: 1; }
+    .ss-streak-lbl { font-size: 10px; color: var(--text-2); text-align: center; margin-bottom: 10px; }
+
+    .ss-cal {
+      display: grid;
+      grid-template-columns: repeat(7,1fr);
+      gap: 4px;
+    }
+    .ss-cal-d { aspect-ratio: 1; border-radius: 3px; }
+    .ss-cal-d.on  { background: var(--amber); opacity: 0.8; }
+    .ss-cal-d.off { background: var(--surface-mid); }
+    .ss-cal-d.now { background: var(--amber); box-shadow: 0 0 8px rgba(232,160,48,0.55); }
+
+    /* ── SCREENSHOT 6: Search ── */
+    .ss-searchbar {
+      background: var(--surface-mid);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+    .ss-searchbar-ph { font-size: 9.5px; color: var(--text-3); }
+    .ss-searchicon {
+      width: 11px; height: 11px;
+      border: 1.5px solid var(--text-3);
+      border-radius: 50%;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .ss-searchicon::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; right: -4px;
+      width: 5px; height: 1.5px;
+      background: var(--text-3);
+      transform: rotate(45deg);
+      border-radius: 1px;
+    }
+
+    .ss-hi { color: var(--amber); }
+
+    /* ── BOTTOM CTA ── */
+    .cta {
+      padding: 130px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(ellipse, rgba(232,160,48,0.075) 0%, transparent 62%);
+      pointer-events: none;
+    }
+
+    .cta .sec-label { margin-bottom: 22px; }
+
+    .cta-h2 {
+      font-size: clamp(38px, 4.5vw, 60px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.08;
+      max-width: 680px;
+      margin: 0 auto 18px;
+    }
+
+    .cta-sub {
+      font-size: 17px;
+      color: var(--text-2);
+      max-width: 440px;
+      margin: 0 auto 46px;
+      line-height: 1.65;
+    }
+
+    .cta-actions { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+    .cta-note { font-size: 13px; color: var(--text-3); }
+    .cta-note strong { color: var(--amber); font-weight: 600; }
+
+    /* ── FOOTER ── */
+    .footer-wrap {
+      border-top: 1px solid var(--border);
+      padding: 0 48px;
+    }
+
+    footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .foot-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .foot-logo-icon {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface-mid);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .foot-logo-icon img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .foot-logo-name { font-size: 15px; font-weight: 700; color: var(--text-1); }
+
+    .foot-right {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .foot-link {
+      font-size: 13px;
+      color: var(--text-2);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .foot-link:hover { color: var(--text-1); }
+
+    .foot-copy { font-size: 13px; color: var(--text-3); }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      max-width: 1200px;
+      margin: 0 auto;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      nav { padding: 0 24px; }
+
+      .hero {
+        padding: 90px 24px 70px;
+        min-height: auto;
+      }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 64px;
+        text-align: center;
+      }
+
+      .hero-badge  { margin: 0 auto 32px; }
+      .hero-sub    { margin-left: auto; margin-right: auto; }
+      .hero-actions { justify-content: center; }
+      .phone-col   { order: -1; }
+
+      .features    { padding: 80px 24px; }
+      .feat-grid   { grid-template-columns: repeat(2,1fr); }
+
+      .shots-head  { padding: 0 24px; }
+      .shots-strip { padding: 16px 24px 36px; }
+
+      .cta         { padding: 90px 24px; }
+
+      .footer-wrap { padding: 0 24px; }
+      footer {
+        flex-direction: column;
+        gap: 18px;
+        text-align: center;
+        padding: 28px 0;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .feat-grid   { grid-template-columns: 1fr; }
+      .hero-h1     { letter-spacing: -1.8px; }
+      .nav-cta     { font-size: 13px; padding: 8px 16px; }
+      .play-btn    { padding: 11px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <a href="/" class="nav-logo">
+      <div class="nav-icon">
+        <img src="../voice_journal/assets/icon/icon.png" alt="Spoke" onerror="this.parentElement.textContent='🎙️'">
+      </div>
+      <span class="nav-wordmark">Spoke</span>
+    </a>
+    <a href="TODO_PLAY_STORE_URL" class="nav-cta" target="_blank" rel="noopener noreferrer">
+      Download Free
+    </a>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+
+      <div class="hero-content">
+        <div class="hero-badge">🎉 &nbsp;Now on Google Play</div>
+        <h1 class="hero-h1">
+          Your journal.<br>
+          Finally in your<br>
+          <span class="amber">own voice.</span>
+        </h1>
+        <p class="hero-sub">
+          Spoke is the voice journal for people who've tried writing journals but quit. Tap, talk, and let AI surface the patterns in your life — every week.
+        </p>
+        <div class="hero-actions">
+          <a href="TODO_PLAY_STORE_URL" class="play-btn" target="_blank" rel="noopener noreferrer">
+            <!-- Google Play triangle icon -->
+            <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 3.62c0-.96.73-1.34 1.63-.86l20.5 11.11c.9.48.9 1.27 0 1.76L6.63 26.74C5.73 27.22 5 26.84 5 25.88V3.62Z" fill="#E8A030"/>
+            </svg>
+            <div class="play-btn-labels">
+              <span class="top">Get it on</span>
+              <span class="bot">Google Play</span>
+            </div>
+          </a>
+          <span class="hero-note">Free · 14-day full trial</span>
+        </div>
+      </div>
+
+      <!-- Hero phone mockup -->
+      <div class="phone-col">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="p-title">Spoke</div>
+            <div class="p-recstatus">● Recording</div>
+            <div class="p-timer">0:42</div>
+            <div class="waveform">
+              <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+              <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+              <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+              <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+              <div class="wbar"></div><div class="wbar"></div>
+            </div>
+            <div class="p-transcript">
+              <p><em>Today was actually pretty good. I finished the project early and felt proud of myself for the first time in a while</em> — I think that's what I've been missing...</p>
+            </div>
+            <div class="p-recbtn"></div>
+            <div class="p-chips">
+              <div class="chip g">Great</div>
+              <div class="chip n">Neutral</div>
+              <div class="chip r">Rough</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── FEATURES ── -->
+  <section class="features">
+    <div class="sec-label">Why Spoke</div>
+    <h2 class="sec-title">Everything a journal should be.<br>None of what holds you back.</h2>
+    <p class="sec-sub">Built for people with ideas but no time, thoughts but no patience, feelings they can't quite write down.</p>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <span class="feat-icon">🎙️</span>
+        <div class="feat-name">Voice First, Always</div>
+        <p class="feat-desc">Tap once and talk. No blank page, no keyboard, no friction. Your voice captures more than your fingers ever could.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🔒</span>
+        <div class="feat-name">Genuinely Private</div>
+        <p class="feat-desc">Audio never leaves your device. Core features work in airplane mode. No account required. Verify it yourself.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🤖</span>
+        <div class="feat-name">Your Weekly AI Mirror</div>
+        <p class="feat-desc">Every week, AI reads your entries and surfaces patterns you didn't consciously notice. Not summaries — actual insights.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">😊</span>
+        <div class="feat-name">One-Tap Mood Logging</div>
+        <p class="feat-desc">Tag your mood after each entry. Watch emotional patterns emerge over weeks and understand what actually moves your needle.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🔥</span>
+        <div class="feat-name">Streak Accountability</div>
+        <p class="feat-desc">Daily streaks and gentle reminders help you build the journaling habit you always meant to have.</p>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon">🔍</span>
+        <div class="feat-name">Full-Text Search</div>
+        <p class="feat-desc">Find any entry, any memory, any feeling. Your journal becomes a searchable record of who you've been.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SCREENSHOTS STRIP ── -->
+  <section class="shots-section">
+    <div class="shots-head">
+      <div class="sec-label">The App</div>
+      <h2 class="sec-title">Thoughtfully crafted.<br>Dark by design.</h2>
+      <p class="sec-sub">Every screen built for the quiet moments between your thoughts.</p>
+    </div>
+
+    <div class="shots-strip">
+
+      <!-- 1: Recording -->
+      <div class="ss-item">
+        <div class="ss-phone">
+          <div class="ss-notch"></div>
+          <div class="ss-screen">
+            <div class="ss-head">Recording</div>
+            <div style="font-size:24px;font-weight:800;color:var(--amber);letter-spacing:-1px;line-height:1;margin-bottom:6px;">0:38</div>
+            <div class="ss-wave">
+              <span style="height:55%"></span><span style="height:85%"></span>
+              <span style="height:42%"></span><span style="height:95%"></span>
+              <span style="height:68%"></span><span style="height:52%"></span>
+              <span style="height:78%"></span><span style="height:38%"></span>
+              <span style="height:62%"></span>
+            </div>
+            <div style="background:var(--surface-mid);border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-size:9.5px;color:var(--text-2);line-height:1.5;margin-bottom:auto;">
+              I think the reason I've been feeling off lately is because I keep saying yes to things I don't actually want...
+            </div>
+            <div class="ss-recbtn"></div>
+          </div>
+        </div>
+        <span class="ss-caption">Record</span>
+      </div>
+
+      <!-- 2: Entries -->
+      <div class="ss-item">
+        <div class="ss-phone">
+          <div class="ss-notch"></div>
+          <div class="ss-screen">
+            <div class="ss-head">Journal</div>
+            <div class="ss-entry">
+              <div class="ss-edate">Today, 9:24 AM</div>
+              <div class="ss-etext">The morning run cleared my head. First time in weeks I felt...</div>
+              <div class="ss-dot" style="background:var(--green);"></div>
+            </div>
+            <div class="ss-entry">
+              <div class="ss-edate">Yesterday, 10:47 PM</div>
+              <div class="ss-etext">Can't sleep. Kept replaying the meeting. Wish I had spoken up...</div>
+              <div class="ss-dot" style="background:var(--red);"></div>
+            </div>
+            <div class="ss-entry">
+              <div class="ss-edate">Mon, 7:52 PM</div>
+              <div class="ss-etext">Coffee with an old friend. Reminded me to reach out more...</div>
+              <div class="ss-dot" style="background:var(--amber);"></div>
+            </div>
+            <div style="font-size:9.5px;color:var(--amber);text-align:center;margin-top:auto;font-weight:700;">🔥 7-day streak</div>
+          </div>
+        </div>
+        <span class="ss-caption">Your Entries</span>
+      </div>
+
+      <!-- 3: Mood Tagging -->
+      <div class="ss-item">
+        <div class="ss-phone">
+          <div class="ss-notch"></div>
+          <div class="ss-screen">
+            <div class="ss-head">Mood</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-1);margin-bottom:10px;">How are you feeling?</div>
+            <div class="ss-mood-grid">
+              <div class="ss-mood-btn" style="border-color:rgba(109,191,138,0.3);background:rgba(109,191,138,0.08);">
+                <div class="ss-mood-em">😊</div>
+                <div class="ss-mood-l" style="color:var(--green);">Great</div>
+              </div>
+              <div class="ss-mood-btn">
+                <div class="ss-mood-em">🙂</div>
+                <div class="ss-mood-l">Good</div>
+              </div>
+              <div class="ss-mood-btn">
+                <div class="ss-mood-em">😐</div>
+                <div class="ss-mood-l">Neutral</div>
+              </div>
+              <div class="ss-mood-btn">
+                <div class="ss-mood-em">😔</div>
+                <div class="ss-mood-l">Rough</div>
+              </div>
+            </div>
+            <div style="font-size:8.5px;color:var(--text-3);text-align:center;margin-top:auto;">Work · Personal · Health · Relationships</div>
+          </div>
+        </div>
+        <span class="ss-caption">Mood Tag</span>
+      </div>
+
+      <!-- 4: AI Summary -->
+      <div class="ss-item">
+        <div class="ss-phone">
+          <div class="ss-notch"></div>
+          <div class="ss-screen">
+            <div class="ss-head">AI Mirror</div>
+            <div class="ss-sumcard">
+              <div class="ss-sumwk">This Week's Mirror</div>
+              <div class="ss-sumtxt">"You mentioned feeling proud three times this week — something you rarely do. Your mood lifted every time after exercise..."</div>
+              <div class="ss-line" style="width:100%"></div>
+              <div class="ss-line" style="width:80%"></div>
+              <div class="ss-line" style="width:55%"></div>
+            </div>
+            <div style="background:rgba(232,160,48,0.09);border:1px solid rgba(232,160,48,0.22);border-radius:8px;padding:9px 10px;margin-top:auto;">
+              <div style="font-size:8.5px;font-weight:700;color:var(--amber);margin-bottom:2px;">Key Pattern</div>
+              <div style="font-size:9.5px;color:var(--text-2);">Morning entries → better days</div>
+            </div>
+          </div>
+        </div>
+        <span class="ss-caption">Weekly Summary</span>
+      </div>
+
+      <!-- 5: Streak -->
+      <div class="ss-item">
+        <div class="ss-phone">
+          <div class="ss-notch"></div>
+          <div class="ss-screen">
+            <div class="ss-head">Streak</div>
+            <div class="ss-streak-num">12</div>
+            <div class="ss-streak-lbl">day streak 🔥</div>
+            <div class="ss-cal">
+              <div class="ss-cal-d on"></div><div class="ss-cal-d on"></div>
+              <div class="ss-cal-d on"></div><div class="ss-cal-d on"></div>
+              <div class="ss-cal-d on"></div><div class="ss-cal-d on"></div>
+              <div class="ss-cal-d on"></div><div class="ss-cal-d on"></div>
+              <div class="ss-cal-d on"></div><div class="ss-cal-d on"></div>
+              <div class="ss-cal-d on"></div><div class="ss-cal-d now"></div>
+              <div class="ss-cal-d off"></div><div class="ss-cal-d off"></div>
+            </div>
+            <div style="font-size:9px;color:var(--text-3);text-align:center;margin-top:auto;line-height:1.5;">Keep going.<br>Tomorrow is day 13.</div>
+          </div>
+        </div>
+        <span class="ss-caption">Streak</span>
+      </div>
+
+      <!-- 6: Search -->
+      <div class="ss-item">
+        <div class="ss-phone">
+          <div class="ss-notch"></div>
+          <div class="ss-screen">
+            <div class="ss-head">Search</div>
+            <div class="ss-searchbar">
+              <div class="ss-searchicon"></div>
+              <span class="ss-searchbar-ph">Search your journal...</span>
+            </div>
+            <div style="font-size:8.5px;color:var(--text-3);margin-bottom:7px;">2 results for "proud"</div>
+            <div class="ss-entry">
+              <div class="ss-edate">Jun 12, 2026</div>
+              <div class="ss-etext">...felt really <span class="ss-hi">proud</span> after finishing the project early...</div>
+            </div>
+            <div class="ss-entry">
+              <div class="ss-edate">May 28, 2026</div>
+              <div class="ss-etext">...called mom and felt <span class="ss-hi">proud</span> of how far I've come...</div>
+            </div>
+          </div>
+        </div>
+        <span class="ss-caption">Search</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── BOTTOM CTA ── -->
+  <section class="cta">
+    <div class="sec-label">Start Today</div>
+    <h2 class="cta-h2">Your thoughts deserve<br>to be heard.</h2>
+    <p class="cta-sub">No account. No credit card. 14 days of full premium access — free. Then just $3.99/month.</p>
+    <div class="cta-actions">
+      <a href="TODO_PLAY_STORE_URL" class="play-btn" target="_blank" rel="noopener noreferrer">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 3.62c0-.96.73-1.34 1.63-.86l20.5 11.11c.9.48.9 1.27 0 1.76L6.63 26.74C5.73 27.22 5 26.84 5 25.88V3.62Z" fill="#E8A030"/>
+        </svg>
+        <div class="play-btn-labels">
+          <span class="top">Get it on</span>
+          <span class="bot">Google Play</span>
+        </div>
+      </a>
+      <div class="cta-note">
+        <strong>14-day free trial</strong>&nbsp;·&nbsp;No credit card&nbsp;·&nbsp;Cancel anytime
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <div class="footer-wrap">
+    <footer>
+      <a href="/" class="foot-logo">
+        <div class="foot-logo-icon">
+          <img src="../voice_journal/assets/icon/icon.png" alt="Spoke" onerror="this.parentElement.textContent='🎙️'">
+        </div>
+        <span class="foot-logo-name">Spoke</span>
+      </a>
+      <div class="foot-right">
+        <a href="privacy.html" class="foot-link">Privacy Policy</a>
+        <span class="foot-copy">© 2026 Spoke. All rights reserved.</span>
+      </div>
+    </footer>
+  </div>
+
+</body>
+</html>
